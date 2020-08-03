@@ -5,6 +5,6 @@
 poetry install
 ```
 
-# [from]
+# from
 - [能获取到5级全国地址python爬虫](https://blog.csdn.net/panrongju/article/details/105559248)
 
