@@ -2,7 +2,7 @@ import requests as r
 import time
 import re
  
-#  crawler 类
+#  Crawler 类
 #  国家统计局主页小爬虫类
  
 #  get_http(url)  得到页面数据
