@@ -12,14 +12,14 @@ if __name__ == "__main__":
     
     province = [["provincetr","</tr>"],["href='","'",">","<"]]
     city = [["citytr","</tr>"],["href='","'",">","<","href='","'",">","<"]]
-    county = [["countytr","</tr>"],["href='","'",">","<","href='","'",">","<"]]
+    county = [["countytr","</tr>"],["href='","'",">","<","href='","'",">","<"],["<td>","</td>","<td>","</td>"]]
     town = [["towntr","</tr>"],["href='","'",">","<","href='","'",">","<"]]
-    village = [["villagetr","</tr>"],["<td>","</td><td>","</td><td>","</td>"]]
+    village = [["villagetr","</tr>"],["<td>","</td>","<td>","</td>","<td>","</td>"]]
     keys = [province,city,county,town,village] 
 
     ## 创建crawler爬虫实例
     x = Crawler(url)
-    
+
     ## 获得页面数据data
     data = x.get_http(url)
     while data == False:
