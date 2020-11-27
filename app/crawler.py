@@ -1,6 +1,7 @@
 import requests as r
 import time
 import re
+import pymongo
  
 #  Crawler 类
 #  国家统计局主页小爬虫类
@@ -34,9 +35,11 @@ import re
 class Crawler:
  
     url = ""
- 
+    db = ""
     def __init__(self, url):
         self.url = url
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+        self.db = myclient["commondata"]
  
     # 获得页面数据
     def get_http(self, url):
@@ -45,7 +48,7 @@ class Crawler:
             data_request = r.get(url, timeout = 5)   
             if data_request:
                 i = 10
-                data_request.encoding = "gb2312"
+                data_request.encoding = "gbk"
                 text_request = data_request.text
                 return text_request
             else:
@@ -83,7 +86,7 @@ class Crawler:
             if t == 1:
                 # 数据切片 
                 slice_data = data[index_strat : index_end]          
-                d_list.append(slice_data)      
+                d_list.append(slice_data)    
                 # 让起始下标 变为 结尾下标                     
                 index_strat = index_end
         # 列表中元素 遍历结束，重置起始下标
@@ -137,6 +140,8 @@ class Crawler:
                     if numb == 5:
                         if ran >= range:
                             c = a[index_strat : index_end]
+                            if c.isdigit():
+                                c = a[index_strat + 12: len(a) - 5]
                             dic.update({value : c})
                             # 重置计数
                             ran = 0
@@ -150,28 +155,30 @@ class Crawler:
         return dic
     
     # 遍历页面数据， 合并了str_slice方法和list_slice方法
-    def data_slice(self, 页面数据, 关键字符, save = None,range = 0):
+    def data_slice(self, pageData, keys, save = None,range = 0):
  
         ## 对页面数据进行 分割返回列表数据
-        列表数据 = self.str_slice(页面数据, 关键字符[0])   
+        listData = self.str_slice(pageData, keys[0])   
  
         ##  对列表数据进行 分割返回字典数据
-        字典数据 = self.list_slice(列表数据, 关键字符[1], range)
+        dictData = self.list_slice(listData, keys[1], range)
  
         ## 返回字典数据
-        return 字典数据
+        return dictData
  
     ## 遍历所有地址， 需要传递data城市页面数据
     def traverse(self, data, keys):
  
-        ## 调用遍历页面数据方法， 传递data参数，返回省份字典
+        ## 调用遍历页面数据方法， 传递data参数，返回province
         print("开始获取省份数据*********************************************************************************")
-        省份字典 = self.data_slice(data, keys[0])
+        province = self.data_slice(data, keys[0])
         cont = 0
  
-        if 省份字典:
+        if province:
             ## 遍历省份
-            for s1,s2 in 省份字典.items():
+            for s1,s2 in province.items():
+                print(s1[0:s1.find(".")])
+                self.db["province"].insert_one({ "className": "com.lumiing.bean.Province", "title": s2, "code": s1[0:s1.find(".")] })
                 while cont < 6:
                     ##time.sleep(2)
  
@@ -184,11 +191,17 @@ class Crawler:
                 cont = 0
                 s1 =  s1[0:s1.find(".")] + "/"
                 print("开始获取城市数据*********************************************************************************")
-                ## 调用遍历页面数据方法， 传递城市数据data参数，返回城市字典
-                城市字典 = self.data_slice(data, keys[1],range=1)
-                if 城市字典:
+                ## 调用遍历页面数据方法， 传递城市数据data参数，返回city
+                city = self.data_slice(data, keys[1],range=1)
+                if city:
                     # 遍历城市
-                    for c1,c2 in 城市字典.items():
+                    for c1,c2 in city.items():
+                        if c2 == "市辖区":
+                            c2 = s2
+                        
+                        sCityCode = c1[c1.find("/") + 1:c1.find(".")]
+                        cityCode = sCityCode.ljust(12, '0')
+                        self.db["city"].insert_one({ "className": "com.lumiing.bean.City", "title": c2, "provinceCode":s1[0:s1.find(".")], "code": cityCode })
                         while cont < 6:
                             ##time.sleep(2)
  
@@ -200,11 +213,14 @@ class Crawler:
                             time.sleep(2)
                         cont = 0
                         print("开始获取区县数据*********************************************************************************")
-                        ## 调用遍历页面数据方法， 传递区县数据data参数，返回城市字典
-                        区县字典 = self.data_slice(data, keys[2],range=1)
-                        if 区县字典:
+                        ## 调用遍历页面数据方法， 传递区县数据data参数，返回city
+                        county = self.data_slice(data, keys[2],range=1)
+                        if county:
                             # 遍历区县
-                            for q1,q2 in 区县字典.items():
+                            for q1,q2 in county.items():
+                                sCountyCode = q1[q1.find("/") + 1:q1.find(".")]
+                                countyCode = sCountyCode.ljust(12, '0')
+                                self.db["county"].insert_one({ "className": "com.lumiing.bean.County", "title": q2, "cityCode":cityCode, "code": countyCode  })
                                 while cont < 6:
                                     ##time.sleep(2)
  
@@ -218,10 +234,13 @@ class Crawler:
                                 q1 = q1[0:q1.find("/")] + "/"
                                 print("开始获取街道数据*********************************************************************************")
                                  ## 调用遍历页面数据方法， 传递街道数据data参数，返回街道字典
-                                街道字典 = self.data_slice(data, keys[3],range=1)
-                                if 街道字典:
+                                town = self.data_slice(data, keys[3],range=1)
+                                if town:
                                     # 遍历街道
-                                    for j1,j2 in 街道字典.items():
+                                    for j1,j2 in town.items():
+                                        sTownCode = j1[j1.find("/") + 1:j1.find(".")]
+                                        townCode = sTownCode.ljust(12, '0')
+                                        self.db["town"].insert_one({ "className": "com.lumiing.bean.Town", "title": j2, "code":townCode, "countyCode": countyCode  })
                                         while cont < 6:
                                             ##time.sleep(2)
                                             ## 获取j1下一级社区页面数据， 返回社区页面数据data
@@ -233,10 +252,11 @@ class Crawler:
                                         cont = 0
                                         print("开始获取社区数据*********************************************************************************")
                                         ## 调用遍历页面数据方法， 传递社区数据data参数，返回社区列表
-                                        社区列表 = self.str_slice(data, keys[4])
-                                        for 社区 in 社区列表:
-                                            最终地址 = s2+"-->"+c2+"-->"+q2+"-->"+j2+"-->"+社区
-                                            print(最终地址)
+                                        village = self.data_slice(data, keys[4] , 3)
+                                        for v1,v2 in village.items() :
+                                            self.db["village"].insert_one({ "className": "com.lumiing.bean.Village", "title": v2, "townCode": townCode, "code": v1 })
+                                            address = s2+"-->"+c2+"-->"+q2+"-->"+j2+"-->"+ v2
+                                            print(address)
                                 else:
                                     print("街道遍历结束")
                         else:
