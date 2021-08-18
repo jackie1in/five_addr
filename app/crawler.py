@@ -40,13 +40,6 @@ class Crawler:
     db = ""
     def __init__(self, url):
         self.url = url
-        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-        self.db = myclient["commondata"]
-        self.db["province"].drop()
-        self.db["city"].drop()
-        self.db["county"].drop()
-        self.db["town"].drop()
-        self.db["village"].drop()
  
     # 获得页面数据
     def get_http(self, url):
@@ -181,11 +174,15 @@ class Crawler:
         province = self.data_slice(data, keys[0])
         cont = 0
         d_county = [keys[2][0],keys[2][2]] 
+        address_open = open("address.txt", 'w')
         if province:
             ## 遍历省份
             for s1,s2 in province.items():
-                print(s1[0:s1.find(".")])
-                self.db["province"].insert_one({ "className": "com.lumiing.bean.Province", "title": s2, "code": s1[0:s1.find(".")] })
+                provinceCode=s1[0:s1.find(".")].ljust(12, '0')
+                # self.db["province"].insert_one({ "className": "com.lumiing.bean.Province", "title": s2, "code": s1[0:s1.find(".")] })
+                provinceAddr=F"{provinceCode}@@{s2}@@1@@省\n"
+                address_open.write(provinceAddr)
+                print(provinceAddr)
                 while cont < 6:
                     ##time.sleep(2)
  
@@ -208,7 +205,10 @@ class Crawler:
                         
                         sCityCode = c1[c1.find("/") + 1:c1.find(".")]
                         cityCode = sCityCode.ljust(12, '0')
-                        self.db["city"].insert_one({ "className": "com.lumiing.bean.City", "title": c2, "provinceCode":s1[0:s1.find(".")], "code": cityCode })
+                        cityAddr=F"{cityCode}@@{c2}@@2@@市\n"
+                        address_open.write(cityAddr)
+                        print(cityAddr)
+                        #self.db["city"].insert_one({ "className": "com.lumiing.bean.City", "title": c2, "provinceCode":s1[0:s1.find(".")], "code": cityCode })
                         while cont < 6:
                             ##time.sleep(2)
  
@@ -227,7 +227,10 @@ class Crawler:
                             for q1,q2 in county.items():
                                 sCountyCode = q1[q1.find("/") + 1:q1.find(".")]
                                 countyCode = sCountyCode.ljust(12, '0')
-                                self.db["county"].insert_one({ "className": "com.lumiing.bean.County", "title": q2, "cityCode":cityCode, "code": countyCode  })
+                                countyAddr=F"{countyCode}@@{q2}@@3@@区县\n"
+                                address_open.write(countyAddr)
+                                print(countyAddr)
+                                #self.db["county"].insert_one({ "className": "com.lumiing.bean.County", "title": q2, "cityCode":cityCode, "code": countyCode  })
                                 while cont < 6:
                                     ##time.sleep(2)
  
@@ -247,7 +250,10 @@ class Crawler:
                                     for j1,j2 in town.items():
                                         sTownCode = j1[j1.find("/") + 1:j1.find(".")]
                                         townCode = sTownCode.ljust(12, '0')
-                                        self.db["town"].insert_one({ "className": "com.lumiing.bean.Town", "title": j2, "code":townCode, "countyCode": countyCode  })
+                                        townAddr=F"{townCode}@@{j2}@@4@@镇、街道\n"
+                                        address_open.write(townAddr)
+                                        print(townAddr)
+                                        #self.db["town"].insert_one({ "className": "com.lumiing.bean.Town", "title": j2, "code":townCode, "countyCode": countyCode  })
                                         while cont < 6:
                                             ##time.sleep(2)
                                             ## 获取j1下一级社区页面数据， 返回社区页面数据data
@@ -261,9 +267,10 @@ class Crawler:
                                         ## 调用遍历页面数据方法， 传递社区数据data参数，返回社区列表
                                         village = self.data_slice(data,keys[4],1)
                                         for v1,v2 in village.items() :
-                                            self.db["village"].insert_one({ "className": "com.lumiing.bean.Village", "title": v2, "townCode": townCode, "code": v1 })
-                                            address = s2+"-->"+c2+"-->"+q2+"-->"+j2+"-->"+ v2
-                                            print(address)
+                                            villageAddr=F"{v1}@@{v2}@@5@@村、社区\n"
+                                            address_open.write(villageAddr)
+                                            print(villageAddr)
+                                            #self.db["village"].insert_one({ "className": "com.lumiing.bean.Village", "title": v2, "townCode": townCode, "code": v1 })
                                 else:
                                     print("街道遍历结束")
                         else:
