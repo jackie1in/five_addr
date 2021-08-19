@@ -285,3 +285,4 @@ class Crawler:
                     print("城市遍历结束")
         else:
             print("省份遍历结束")
+            address_open.close()
