@@ -275,7 +275,11 @@ class Crawler:
                             if county:
                                 # 遍历区县
                                 for q1,q2 in county.items():
-                                    self.db["county"].insert_one({ "className": "com.lumiing.bean.County", "title": q2, "cityCode":cityCode, "code": q1  })
+                                    # self.db["county"].insert_one({ "className": "com.lumiing.bean.County", "title": q2, "cityCode":cityCode, "code": q1  })
+                                    countyCode = q1
+                                    countyAddr=F"{cityCode}@@00,{provinceCode},{cityCode}@@{countyCode}@@{q2}@@3@@区县\n"
+                                    address_open.write(countyAddr)
+                                    print(countyAddr)
                             print("区县遍历结束")
                 else:
                     print("城市遍历结束")
