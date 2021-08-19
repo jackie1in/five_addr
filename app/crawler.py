@@ -178,9 +178,9 @@ class Crawler:
         if province:
             ## 遍历省份
             for s1,s2 in province.items():
-                provinceCode=s1[0:s1.find(".")].ljust(12, '0')
+                provinceCode=s1[0:s1.find(".")]
                 # self.db["province"].insert_one({ "className": "com.lumiing.bean.Province", "title": s2, "code": s1[0:s1.find(".")] })
-                provinceAddr=F"{provinceCode}@@{s2}@@1@@省\n"
+                provinceAddr=F"00@@00@@{provinceCode}@@{s2}@@1@@省\n"
                 address_open.write(provinceAddr)
                 print(provinceAddr)
                 while cont < 6:
@@ -203,9 +203,8 @@ class Crawler:
                         if c2 == "市辖区":
                             c2 = s2
                         
-                        sCityCode = c1[c1.find("/") + 1:c1.find(".")]
-                        cityCode = sCityCode.ljust(12, '0')
-                        cityAddr=F"{cityCode}@@{c2}@@2@@市\n"
+                        cityCode = c1[c1.find("/") + 1:c1.find(".")]
+                        cityAddr=F"{provinceCode}@@00,{provinceCode}@@{cityCode}@@{c2}@@2@@市\n"
                         address_open.write(cityAddr)
                         print(cityAddr)
                         #self.db["city"].insert_one({ "className": "com.lumiing.bean.City", "title": c2, "provinceCode":s1[0:s1.find(".")], "code": cityCode })
@@ -225,9 +224,8 @@ class Crawler:
                         if county:
                             # 遍历区县
                             for q1,q2 in county.items():
-                                sCountyCode = q1[q1.find("/") + 1:q1.find(".")]
-                                countyCode = sCountyCode.ljust(12, '0')
-                                countyAddr=F"{countyCode}@@{q2}@@3@@区县\n"
+                                countyCode = q1[q1.find("/") + 1:q1.find(".")]
+                                countyAddr=F"{cityCode}@@00,{provinceCode},{cityCode}@@{countyCode}@@{q2}@@3@@区县\n"
                                 address_open.write(countyAddr)
                                 print(countyAddr)
                                 #self.db["county"].insert_one({ "className": "com.lumiing.bean.County", "title": q2, "cityCode":cityCode, "code": countyCode  })
@@ -248,9 +246,8 @@ class Crawler:
                                 if town:
                                     # 遍历街道
                                     for j1,j2 in town.items():
-                                        sTownCode = j1[j1.find("/") + 1:j1.find(".")]
-                                        townCode = sTownCode.ljust(12, '0')
-                                        townAddr=F"{townCode}@@{j2}@@4@@镇、街道\n"
+                                        townCode = j1[j1.find("/") + 1:j1.find(".")]
+                                        townAddr=F"{countyCode}@@00,{provinceCode},{cityCode},{countyCode}@@{townCode}@@{j2}@@4@@镇、街道\n"
                                         address_open.write(townAddr)
                                         print(townAddr)
                                         #self.db["town"].insert_one({ "className": "com.lumiing.bean.Town", "title": j2, "code":townCode, "countyCode": countyCode  })
@@ -267,7 +264,7 @@ class Crawler:
                                         ## 调用遍历页面数据方法， 传递社区数据data参数，返回社区列表
                                         village = self.data_slice(data,keys[4],1)
                                         for v1,v2 in village.items() :
-                                            villageAddr=F"{v1}@@{v2}@@5@@村、社区\n"
+                                            villageAddr=F"{townCode}@@00,{provinceCode},{cityCode},{countyCode},{townCode}@@{v1}@@{v2}@@5@@村、社区\n"
                                             address_open.write(villageAddr)
                                             print(villageAddr)
                                             #self.db["village"].insert_one({ "className": "com.lumiing.bean.Village", "title": v2, "townCode": townCode, "code": v1 })
