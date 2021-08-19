@@ -184,7 +184,7 @@ class Crawler:
                 address_open.write(provinceAddr)
                 print(provinceAddr)
                 while cont < 6:
-                    time.sleep(1)
+                    time.sleep(0.2)
  
                     ## 获取s1省份下一级城市页面数据, 返回省份页面数据data                   
                     data = self.get_http(self.url+s1)
@@ -208,7 +208,7 @@ class Crawler:
                         print(cityAddr)
                         #self.db["city"].insert_one({ "className": "com.lumiing.bean.City", "title": c2, "provinceCode":s1[0:s1.find(".")], "code": cityCode })
                         while cont < 6:
-                            time.sleep(1)
+                            time.sleep(0.2)
  
                             ## 获取c1城市下一级区县页面数据， 返回区县页面数据data
                             data = self.get_http(self.url+c1)
@@ -228,7 +228,7 @@ class Crawler:
                                 print(countyAddr)
                                 #self.db["county"].insert_one({ "className": "com.lumiing.bean.County", "title": q2, "cityCode":cityCode, "code": countyCode  })
                                 while cont < 6:
-                                    time.sleep(1)
+                                    time.sleep(0.2)
  
                                     ## 获取q1下一级街道页面数据， 返回街道页面数据data
                                     data = self.get_http(self.url+s1+q1)
@@ -249,7 +249,7 @@ class Crawler:
                                         print(townAddr)
                                         #self.db["town"].insert_one({ "className": "com.lumiing.bean.Town", "title": j2, "code":townCode, "countyCode": countyCode  })
                                         while cont < 6:
-                                            time.sleep(1)
+                                            time.sleep(0.2)
                                             ## 获取j1下一级社区页面数据， 返回社区页面数据data
                                             data = self.get_http(self.url+s1+q1+j1)
                                             if data:
