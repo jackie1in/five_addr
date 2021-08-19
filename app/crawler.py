@@ -1,7 +1,7 @@
 import requests as r
 import time
 import re
-import pymongo
+# import pymongo
  
 #  Crawler 类
 #  国家统计局主页小爬虫类
@@ -184,14 +184,13 @@ class Crawler:
                 address_open.write(provinceAddr)
                 print(provinceAddr)
                 while cont < 6:
-                    ##time.sleep(2)
+                    time.sleep(1)
  
                     ## 获取s1省份下一级城市页面数据, 返回省份页面数据data                   
                     data = self.get_http(self.url+s1)
                     if data:
                         break
                     cont+=1
-                    time.sleep(2)
                 cont = 0
                 s1 =  s1[0:s1.find(".")] + "/"
                 print("开始获取城市数据*********************************************************************************")
@@ -209,14 +208,13 @@ class Crawler:
                         print(cityAddr)
                         #self.db["city"].insert_one({ "className": "com.lumiing.bean.City", "title": c2, "provinceCode":s1[0:s1.find(".")], "code": cityCode })
                         while cont < 6:
-                            ##time.sleep(2)
+                            time.sleep(1)
  
                             ## 获取c1城市下一级区县页面数据， 返回区县页面数据data
                             data = self.get_http(self.url+c1)
                             if data:
                                 break
                             cont+=1
-                            time.sleep(2)
                         cont = 0
                         print("开始获取区县数据*********************************************************************************")
                         ## 调用遍历页面数据方法， 传递区县数据data参数，返回city
@@ -230,14 +228,13 @@ class Crawler:
                                 print(countyAddr)
                                 #self.db["county"].insert_one({ "className": "com.lumiing.bean.County", "title": q2, "cityCode":cityCode, "code": countyCode  })
                                 while cont < 6:
-                                    ##time.sleep(2)
+                                    time.sleep(1)
  
                                     ## 获取q1下一级街道页面数据， 返回街道页面数据data
                                     data = self.get_http(self.url+s1+q1)
                                     if data:
                                         break
                                     cont+=1
-                                    time.sleep(2)
                                 cont = 0
                                 q1 = q1[0:q1.find("/")] + "/"
                                 print("开始获取街道数据*********************************************************************************")
@@ -252,13 +249,12 @@ class Crawler:
                                         print(townAddr)
                                         #self.db["town"].insert_one({ "className": "com.lumiing.bean.Town", "title": j2, "code":townCode, "countyCode": countyCode  })
                                         while cont < 6:
-                                            ##time.sleep(2)
+                                            time.sleep(1)
                                             ## 获取j1下一级社区页面数据， 返回社区页面数据data
                                             data = self.get_http(self.url+s1+q1+j1)
                                             if data:
                                                 break
                                             cont+=1
-                                            time.sleep(2)
                                         cont = 0
                                         print("开始获取社区数据*********************************************************************************")
                                         ## 调用遍历页面数据方法， 传递社区数据data参数，返回社区列表
